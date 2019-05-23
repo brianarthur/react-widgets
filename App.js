@@ -12,18 +12,13 @@ import { SearchCard } from "./SearchCard";
 import '@material/react-layout-grid/index.scss';
 
 //HELPER FUNCTIONS //
-function createFilterItems(data, filterList) {
+function createFilterItems(data) {
   const createFilter = {};
   let newFilterItem;
   for (let x = 0; x < data.length; x ++) {
     for (let key in data[x]) {
       if (!(key in createFilter)) {
-        for (let y = 0; y < filterList.length; y ++) {
-          if (filterList[y].key === key) {
-            let title = filterList[y].title;
-          }
-        }
-        createFilter[key] = {"key": key, "items": [], "title": title};
+        createFilter[key] = {"key": key, "items": []};
       }
       newFilterItem = true;
       for (let y = 0; y < createFilter[key].items.length; y ++) {
@@ -77,11 +72,11 @@ export class App extends Component {
   constructor(props) {
     super(props);
 
-    this.toggleSelected = this.toggleSelected.bind(this);
-    this.clearSelectedList = this.clearSelectedList.bind(this);
-    this.clearAllSelected = this.clearAllSelected.bind(this);
+    this.handleToggleSelected = this.handleToggleSelected.bind(this);
+    this.handleClearCardSelectedList = this.handleClearCardSelectedList.bind(this);
+    this.handleClearAllSelected = this.handleClearAllSelected.bind(this);
 
-    const initialFilters = createFilterItems(this.props.data, this.props.filterList);
+    const initialFilters = createFilterItems(this.props.data);
     const selected = {};
     for (let key in initialFilters) {
       selected[key] = Array(initialFilters[key].items.length).fill(false);
@@ -101,7 +96,7 @@ export class App extends Component {
     return selected;
   }
   
-  toggleSelected(card, itemNum) {
+  handleToggleSelected(card, itemNum) {
     let selected = this.__copyOfSelected();
     selected[card][itemNum] = !selected[card][itemNum];
     this.setState({
@@ -109,7 +104,7 @@ export class App extends Component {
     });
   }
 
-  clearSelectedList(card) {
+  handleClearCardSelectedList(card) {
     let selected = this.__copyOfSelected();
     selected[card].fill(false);
     this.setState({
@@ -117,7 +112,7 @@ export class App extends Component {
     });
   }
 
-  clearAllSelected() {
+  handleClearAllSelected() {
     let selected = this.__copyOfSelected();
     for(let x in selected) {
       selected[x].fill(false);
@@ -129,22 +124,21 @@ export class App extends Component {
 
   render() {
     const filterList = this.props.filterList;
+    const title = this.props.title;
+    const resultTableHeaders = this.props.resultTableHeaders;
     const selected = this.state.selected;
-    const filters = createFilterItems(this.props.data, filterList);
+    const filters = createFilterItems(this.props.data);
     const data = filterData(this.props.data, filters, selected);
 
     const filterCards = [];
 
-    //console.log(filters);
-    //console.log(this.props.filterList);
-
     for (let x = 0; x < filterList.length; x ++) {
       switch(filterList[x].type) {
         case "filterCard":
-          filterCards.push(<Row key={filterList[x].key.concat("flterCard")} style={{ marginBottom: "20px" }}><Cell columns={12}><FilterCard title={filterList[x].title} filter={filters[filterList[x].key]} selectedItems={selected[filterList[x].key]} toggleCheckbox={this.toggleSelected} clearSelectedList={this.clearSelectedList}/></Cell></Row>);
+          filterCards.push(<Row key={filterList[x].key.concat("flterCard")} style={{ marginBottom: "20px" }}><Cell columns={12}><FilterCard title={filterList[x].title} filter={filters[filterList[x].key]} selectedItems={selected[filterList[x].key]} toggleCheckbox={this.handleToggleSelected} clearSelectedList={this.handleClearCardSelectedList}/></Cell></Row>);
           break;
         case "searchCard":
-          filterCards.push(<Row key={filterList[x].key.concat("flterCard")} style={{ marginBottom: "20px" }}><Cell columns={12}><SearchCard title={filterList[x].title} filter={filters[filterList[x].key]} selectedItems={selected[filterList[x].key]} toggleCheckbox={this.toggleSelected} clearSelectedList={this.clearSelectedList}/></Cell></Row>)
+          filterCards.push(<Row key={filterList[x].key.concat("flterCard")} style={{ marginBottom: "20px" }}><Cell columns={12}><SearchCard title={filterList[x].title} filter={filters[filterList[x].key]} selectedItems={selected[filterList[x].key]} toggleCheckbox={this.handleToggleSelected} clearSelectedList={this.handleClearCardSelectedList}/></Cell></Row>)
           break;
       }
     }
@@ -158,11 +152,11 @@ export class App extends Component {
             </Cell>
             <Cell columns={8}>
               <Row><Cell columns={12}>
-                <h4>Existing Projects</h4>
-                <AppliedFilters filter={filters} selected={selected} clearAllSelected={this.clearAllSelected} removeSelected={this.toggleSelected} />
+                <h4>{title}</h4>
+                <AppliedFilters filter={filters} filterList={filterList} selected={selected} clearAllSelected={this.handleClearAllSelected} removeSelected={this.handleToggleSelected} />
               </Cell></Row>
               <Row><Cell columns={12}>
-                <ResultTable data={data} />
+                <ResultTable data={data} headers={resultTableHeaders} />
               </Cell></Row>
             </Cell>
           </Row>

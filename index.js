@@ -8,7 +8,7 @@ const resources = ["Arthur, Brian", "Kozarzewska-Brunet, Kinga", "Leung, Fred", 
 
 const projectData = [];
 for (let x = 0; x < 160; x ++) {
-  projectData.push({"projectName": "Project "+x, "projectPhase": "Phase "+(x%8), "applicationName": "App "+(x%13), "releaseEvent": releaseEvents[x%(releaseEvents.length)], "resources": resources[x%(resources.length)]});
+  projectData.push({"projectName": "Project "+x, "projectPhase": "Phase "+(x%8), "applicationName": "App "+(x%13), "releaseEvent": releaseEvents[x%(releaseEvents.length)], "resources": resources[x%(resources.length)], "projectDetails": "Details"});
 }
 
 const filterList = [
@@ -18,6 +18,12 @@ const filterList = [
   {key: "releaseEvent", title: "Release Event", type: "filterCard"},
 ];
 
+const resultTableHeaders = [
+  {key: "projectName", title: "Project Name"},
+  {key: "projectPhase", title: "Project Phase"},
+  {key: "projectDetails", title: "Project Details"},
+]
+
 
 const rootElement = document.getElementById("root");
-ReactDOM.render(<App data={projectData} filterList={filterList} />, rootElement);
+ReactDOM.render(<App data={projectData} filterList={filterList} title={"Existing Projects"} resultTableHeaders={resultTableHeaders}/>, rootElement);

@@ -71,17 +71,29 @@ class NumResults extends Component {
   }
 }
 
+class TableHeader extends Component {
+  render() {
+    const title = this.props.title;
+
+    return (
+      <th style={{border: "1px solid black", padding: "5px"}}><b>{title}</b></th>
+    )
+  }
+}
+
 class TableRow extends Component {
   render() {
     const itemInfo = this.props.item;
+    const headers = this.props.headers;
 
-    return (
-      <tr>
-        <td style={{border: "1px solid black", padding: "10px"}}>{itemInfo.projectName}</td>
-        <td style={{border: "1px solid black", padding: "10px"}}>{itemInfo.projectPhase}</td>
-        <td style={{border: "1px solid black", padding: "10px"}}>Details</td>
-      </tr>
-    )
+    const row = [];
+
+    for (let x = 0; x < headers.length; x ++) {
+      let name = itemInfo[headers[x].key];
+      row.push(<td style={{border: "1px solid black", padding: "10px"}}>{name}</td>);
+    }
+
+    return (<tr>{ row }</tr>)
   }
 }
 
@@ -116,6 +128,11 @@ export class ResultTable extends Component {
 
   render() {
     const data = this.props.data;
+    const headers = this.props.headers;
+    
+    const dataList = [];
+    const tHeaders = [];
+
     const maxItems = this.state.numItems;
     const currentPage = this.state.pageStep;
     const numPages = Math.ceil(data.length / maxItems)
@@ -123,9 +140,12 @@ export class ResultTable extends Component {
     const itemStart = currentPage * maxItems;
     const itemEnd = itemStart + maxItems < data.length ? itemStart + maxItems : data.length;
 
-    const dataList = [];
     for (let x = itemStart; x < itemEnd; x ++) {
-      dataList.push(<TableRow key={"resultRow".concat(x)} item={data[x]}/>);
+      dataList.push(<TableRow key={"resultRow".concat(x)} headers={headers} item={data[x]}/>);
+    }
+
+    for (let x = 0; x < headers.length; x ++) {
+      tHeaders.push(<TableHeader key={"resultHeader".concat(x)} title={headers[x].title}/>);
     }
 
     let lowPage, highPage;
@@ -166,9 +186,7 @@ export class ResultTable extends Component {
             <table style={{width: "100%", textAlign: "left", border: "1px solid black", borderCollapse: "collapse"}}>
               <thead>
                 <tr>
-                  <th style={{border: "1px solid black", padding: "5px"}}><b>Project Name</b></th>
-                  <th style={{border: "1px solid black", padding: "5px"}}><b>Project Phase</b></th>
-                  <th style={{border: "1px solid black", padding: "5px"}}><b>Project Details</b></th>
+                  { tHeaders }
                 </tr>
               </thead>
               <tbody>

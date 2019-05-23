@@ -110,23 +110,22 @@ export class AppliedFilters extends Component {
   render() {
     const filter = this.props.filter;
     const selected = this.props.selected;
+    const filterList = this.props.filterList;
     const appliedFilters = [];
     let filterApplied = false;
 
-    let counter = 0;
-    for(let key in filter) {
-      appliedFilters.push({title: filter[key].title, key: filter[key].key, items: []});
-      for(let y = 0; y < filter[key].items.length; y ++) {
-        if (selected[key][y]) {
+    for(let x = 0; x < filterList.length; x ++) {
+      appliedFilters.push({title: filterList[x].title, key: filterList[x].key, items: []});
+      for(let y = 0; y < filter[filterList[x].key].items.length; y ++) {
+        if (selected[filterList[x].key][y]) {
           filterApplied = true;
-          appliedFilters[counter].items.push(filter[key].items[y]);
+          appliedFilters[x].items.push(filter[filterList[x].key].items[y]);
         } else {
-          appliedFilters[counter].items.push(false);
+          appliedFilters[x].items.push(false);
         }
       }
-      counter += 1;
     }
-
+    
     if (!filterApplied) {
       return null;
     }
