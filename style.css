@@ -2,6 +2,14 @@ h1, p {
   font-family: Lato;
 }
 
-.mdc-list-item {
-  color: red !important;
+.mdc-list-item:hover {
+  background-color: #cacaca;
+}
+
+.mdc-card__primary-action::before, .mdc-card__primary-action::after {
+  background-color: transparent;
+}
+
+:not(.mdc-list--non-interactive)>:not(.mdc-list-item--disabled).mdc-list-item::before, :not(.mdc-list--non-interactive)>:not(.mdc-list-item--disabled).mdc-list-item::after {
+  background-color: transparent;
 }

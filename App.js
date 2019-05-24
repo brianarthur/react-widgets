@@ -11,6 +11,8 @@ import { SearchCard } from "./SearchCard";
 // IMPORT NECESSARY REACT MATERIAL DESIGN STYLESHEETS //
 import '@material/react-layout-grid/index.scss';
 
+import './style.css';
+
 //HELPER FUNCTIONS //
 function createFilterItems(data) {
   const createFilter = {};
