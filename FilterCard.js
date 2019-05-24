@@ -22,7 +22,7 @@ const HIDE_SEARCH = true;
 const MAX_FILTER_ITEMS = 5;
 
 // FILTER REACT COMPONENTS //
-class FilterArrow extends Component {
+export class FilterArrow extends Component {
   render() {
     let icon;
     if (this.props.type === 'up') {icon = 'keyboard_arrow_up'}
@@ -71,6 +71,9 @@ export class FilterTitle extends Component {
   render() {
     const title = this.props.title;
     const selected = this.props.selected;
+    const collapsedState = this.props.collapsedState;
+
+    const icon = collapsedState ? 'arrow_right' : 'arrow_drop_down';
     let clearButton = false;
 
     for (let x = 0; x <= selected.length; x ++) {
@@ -85,6 +88,9 @@ export class FilterTitle extends Component {
         <TopAppBar dense fixed>
           <TopAppBarRow>
             <TopAppBarSection align='start'>
+              <TopAppBarIcon navIcon>
+                <MaterialIcon icon={icon} onClick={this.props.toggleCollapsedState} />
+              </TopAppBarIcon>
               <TopAppBarTitle>{title}</TopAppBarTitle>
             </TopAppBarSection>
             <TopAppBarSection align='end'>
@@ -138,11 +144,12 @@ export class FilterCard extends Component {
     super(props);
     this.state = {
       pageStep: 0,
+      collapsedState: false,
     };
   }
 
   pageJump(step) {
-    const currentPageStep = this.state.pageStep;   
+    const currentPageStep = this.state.pageStep;
     this.setState({
       pageStep: currentPageStep + step,
     });
@@ -150,6 +157,13 @@ export class FilterCard extends Component {
 
   showMenu() {
     console.log('Show menu dropdown');
+  }
+
+  handleToggleCollapse() {
+    const collapsedState = !this.state.collapsedState;
+    this.setState({
+      collapsedState: collapsedState,
+    });
   }
 
   render() {
@@ -161,6 +175,7 @@ export class FilterCard extends Component {
     const title = this.props.title;
     const filterItems = filter.items;
     const selected = this.props.selectedItems;
+    const collapsedState = this.state.collapsedState;
 
     const pageStart = this.state.pageStep * MAX_FILTER_ITEMS;
     const pageEnd = pageStart + MAX_FILTER_ITEMS < filterItems.length ? pageStart + MAX_FILTER_ITEMS : filterItems.length;
@@ -177,25 +192,43 @@ export class FilterCard extends Component {
       );
     }
 
+    const filterContent = (
+      <>
+        { pageStart === 0 ? '' : (<FilterArrow type='up' onClick={() => this.pageJump(-1)} />) }
+        
+        <ListGroup>
+          <List checkboxList selectedIndex={[]}> { listItems } </List>
+          <List> <ListSearchBar /> </List>
+        </ListGroup>
+
+        { pageEnd === filterItems.length ? '' : (<FilterArrow type='down' onClick={() => this.pageJump(1)} />) }
+      </>
+    )
+
     return (
       <Card outlined>
         <CardPrimaryContent style={{margin: "10px"}}>
           <FilterTitle 
             title={title} 
-            selected={selected} 
+            selected={selected}
+            collapsedState={collapsedState}
             onClearClick={() => this.props.clearSelectedList(filter.key)} 
-            onMenuClick={() => this.showMenu()} 
+            onMenuClick={() => this.showMenu()}
+            toggleCollapsedState={() => this.handleToggleCollapse()}
           />
+          { collapsedState ? '' : (
+            <>
+              { pageStart === 0 ? '' : (<FilterArrow type='up' onClick={() => this.pageJump(-1)} />) }
+              
+              <ListGroup>
+                <List checkboxList selectedIndex={[]}> { listItems } </List>
+                <List> <ListSearchBar /> </List>
+              </ListGroup>
 
-          { pageStart === 0 ? '' : (<FilterArrow type='up' onClick={() => this.pageJump(-1)} />) }
-          
-          <ListGroup>
-            <List checkboxList selectedIndex={[]}> { listItems } </List>
-            <List> <ListSearchBar /> </List>
-          </ListGroup>
+              { pageEnd === filterItems.length ? '' : (<FilterArrow type='down' onClick={() => this.pageJump(1)} />) }
+            </>
+          )}
 
-          { pageEnd === filterItems.length ? '' : (<FilterArrow type='down' onClick={() => this.pageJump(1)} />) }
-          
         </CardPrimaryContent>
       </Card>
     );

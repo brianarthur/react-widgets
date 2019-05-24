@@ -7,7 +7,7 @@ import TopAppBar, { TopAppBarFixedAdjust, TopAppBarRow, TopAppBarTitle, TopAppBa
 import MaterialIcon from '@material/react-material-icon';
 import Button from '@material/react-button';
 
-import { FilterTitle, FilterItem } from './FilterCard';
+import { FilterTitle, FilterItem, FilterArrow } from './FilterCard';
 
 
 import "@material/react-text-field/index.scss";
@@ -16,6 +16,8 @@ import "@material/react-card/index.scss";
 import '@material/react-ripple/index.scss';
 import '@material/react-top-app-bar/index.scss';
 import '@material/react-button/index.scss';
+
+const MAX_FILTER_ITEMS = 5
 
 class SearchBar extends Component {
   render() {
@@ -46,6 +48,7 @@ export class SearchCard extends Component {
     this.state = {
       searchValue: "",
       pageStep: 0,
+      collapsedState: false,
     };
   }
 
@@ -64,6 +67,13 @@ export class SearchCard extends Component {
     this.setState({ searchValue: "" });
   }
 
+  handleToggleCollapse() {
+    const collapsedState = !this.state.collapsedState;
+    this.setState({
+      collapsedState: collapsedState,
+    });
+  }
+
   onInputChange = (e) => {
     this.setState({ searchValue: e.target.value });
   };
@@ -74,50 +84,54 @@ export class SearchCard extends Component {
     const selected = this.props.selectedItems;
     const title = this.props.title;
     const value = this.state.searchValue;
+    const collapsedState = this.state.collapsedState;
 
+    const availableItems = [];
     const listItems = [];
 
-    if (value) {
-      for (let x = 0; x < items.length; x ++) {
-        if (items[x].name.search(value) > -1) {
-          listItems.push(
-            <FilterItem
-              removeCheckbox={false}
-              key={items[x].name} 
-              item={items[x]} 
-              selected={selected[x]}
-              onClick={() => this.props.toggleCheckbox(filter.key, x)}
-            />
-          );
-        }
-      }
-    } else {
-      for (let x = 0; x < items.length; x ++) {
-        if (selected[x]) {
-          listItems.push(
-            <FilterItem 
-              removeCheckbox
-              key={items[x].name}
-              item={items[x]}
-              onClick={() => this.props.toggleCheckbox(filter.key, x)}
-            />
-          );
-        }
+    for (let x = 0; x < items.length; x ++) {
+      if ((items[x].name.toLowerCase().search(value.toLowerCase()) > -1) && value) {
+        availableItems.push(x);
+      } else if (selected[x] && !value) {
+        availableItems.push(x);
       }
     }
-   
+
+    const pageStart = this.state.pageStep * MAX_FILTER_ITEMS;
+    const pageEnd = pageStart + MAX_FILTER_ITEMS < availableItems.length ? pageStart + MAX_FILTER_ITEMS : availableItems.length;
+
+    for (let x = pageStart; x < pageEnd; x ++) {
+      listItems.push(
+        <FilterItem
+          removeCheckbox={ value ? false : true}
+          key={items[availableItems[x]].name} 
+          item={items[[availableItems[x]]]}
+          selected={selected[[availableItems[x]]]}
+          onClick={() => this.props.toggleCheckbox(filter.key, availableItems[x])}
+        />
+      );
+    }
+    
     return ( 
       <Card outlined>
         <CardPrimaryContent style={{margin: "10px"}}>
           <FilterTitle 
             title={title}
             selected={selected}
+            collapsedState={collapsedState}
             onClearClick={() => this.props.clearSelectedList(filter.key)} 
             onMenuClick={() => this.showMenu()} 
+            toggleCollapsedState={() => this.handleToggleCollapse()}
           />
-          <SearchBar searchValue={value} onInputChange={this.onInputChange} clearSearchValue={this.clearSearchValue} />
 
-          <List > { listItems } </List>
+          {collapsedState ? '' : (
+            <>
+              <SearchBar searchValue={value} onInputChange={this.onInputChange} clearSearchValue={this.clearSearchValue} />
+              { pageStart === 0 ? '' : (<FilterArrow type='up' onClick={() => this.pageJump(-1)} />) }
+              <List > { listItems } </List>
+              { pageEnd === availableItems.length ? '' : (<FilterArrow type='down' onClick={() => this.pageJump(1)} />) }
+            </>
+          )}
           
         </CardPrimaryContent>
       </Card>
