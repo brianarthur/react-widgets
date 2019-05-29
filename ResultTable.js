@@ -90,7 +90,7 @@ class TableRow extends Component {
 
     for (let x = 0; x < headers.length; x ++) {
       let name = itemInfo[headers[x].key];
-      row.push(<td style={{border: "1px solid black", padding: "10px"}}>{name}</td>);
+      row.push(<td key={'TableRow'.concat(x)} style={{border: "1px solid black", padding: "10px"}}>{name}</td>);
     }
 
     return (<tr>{ row }</tr>)
